@@ -1,5 +1,7 @@
 package com.alonge.shirodemo.config;
 
+import com.alonge.shirodemo.domain.UrlFilter;
+import com.alonge.shirodemo.service.UrlFilterService;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 import org.apache.shiro.mgt.DefaultSessionStorageEvaluator;
 import org.apache.shiro.mgt.DefaultSubjectDAO;
@@ -7,12 +9,14 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.servlet.Filter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,6 +24,9 @@ import java.util.Map;
  */
 @Configuration
 public class ShiroConfig {
+
+    @Autowired
+    UrlFilterService urlFilterService;
     /**
      * 设置shiro的过滤器
      * @param securityManager   安全管理器
@@ -39,23 +46,10 @@ public class ShiroConfig {
 
         // 设置url的拦截器map
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        // 不拦截静态资源
-        filterChainDefinitionMap.put("/static/**", "anon");
-        // token验证错误的接口不进行过滤
-        filterChainDefinitionMap.put("/tokenError", "anon");
-        // 不拦截swagger-ui.html
-        filterChainDefinitionMap.put("/swagger-ui.html","anon");
-        filterChainDefinitionMap.put("/login","anon");
-        // 游客
-        filterChainDefinitionMap.put("/guest/**", "anon");
-        // 设置退出url
-        filterChainDefinitionMap.put("/logout", "logout");
-        filterChainDefinitionMap.put("/index", "user");
-        // 设置访问、api/admin 接口 所需的角色为admin
-        filterChainDefinitionMap.put("/api/admin", "jwt,roles[admin]");
-        filterChainDefinitionMap.put("/api/user", "jwt,roles[user]");
-        // 拦截其余接口
-        filterChainDefinitionMap.put("/**", "jwt");
+        List<UrlFilter> urlFilters = urlFilterService.getListFilters();
+        for (UrlFilter urlFilter: urlFilters) {
+            filterChainDefinitionMap.put(urlFilter.getUrl(), urlFilter.getFilter());
+        }
 
         // 设置登录页,如果不设置默认寻找/login.jsp
         shiroFilterFactoryBean.setLoginUrl("/login");

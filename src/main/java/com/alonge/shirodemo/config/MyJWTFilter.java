@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class MyJWTFilter extends BasicHttpAuthenticationFilter {
 
+    private static String APPLICATION_ADDRESS = ConfHelper.getValue("APPLICATION_ADDRESS");
     /**
      * 是否允许访问
      * 返回true表示允许，返回false标识不允许
@@ -81,10 +82,10 @@ public class MyJWTFilter extends BasicHttpAuthenticationFilter {
      */
     private void responseError(ServletResponse response, String url) {
         try {
-            HttpServletResponse httpServletResponse = (HttpServletResponse) response;
+            HttpServletResponse httpServletResponse = WebUtils.toHttp(response);
             //设置编码，否则中文字符在重定向时会变为空字符串
             //message = URLEncoder.encode(message, "UTF-8");
-            httpServletResponse.sendRedirect(url);
+            httpServletResponse.sendRedirect(APPLICATION_ADDRESS + url);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }

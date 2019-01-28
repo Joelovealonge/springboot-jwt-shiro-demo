@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alonge.shirodemo.mapper.UserMapper">
+    <select id="getUserByUsernameAndPassword" parameterType="java.util.HashMap" resultType="User">
+        SELECT userId, username, password
+        FROM tb_user
+        WHERE username=#{username} and password=#{password}
+    </select>
+    <select id="getRolesByUsername" parameterType="String" resultType="Role">
+        SELECT roleId, role as "roleName", roleDesc
+        FROM tb_role
+        WHERE roleId IN (
+              SELECT ur.roleId FROM tb_user u, tb_user_role ur
+              WHERE u.userId = ur.userId AND u.username=#{username}
+            )
+    </select>
+</mapper>

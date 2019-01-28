@@ -1,16 +1,22 @@
 package com.alonge.shirodemo.config;
 
 import com.alonge.shirodemo.domain.Role;
+import com.alonge.shirodemo.service.UserService;
 import com.alonge.shirodemo.utils.JwtUtil;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UserRealm extends AuthorizingRealm {
+    @Autowired
+    UserService userService;
 
     /**
      * 授权
@@ -25,10 +31,11 @@ public class UserRealm extends AuthorizingRealm {
         // 取出username
         String username = JwtUtil.getUsername(token);
         // 查询user那么对应的角色、权限，
-        // 本案例为了简单，是模拟的角色。实际情况应从数据库中获取
-        Role role = getRoleByUsername(username);
+        List<Role> roleList = userService.getRolesByUsername(username);
         Set<String> roles = new HashSet<>();
-        roles.add(role.getRoleName());
+        for (Role role : roleList) {
+            roles.add(role.getRoleName());
+        }
         // 权限信息集合
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         info.setRoles(roles);
@@ -47,18 +54,6 @@ public class UserRealm extends AuthorizingRealm {
         return new SimpleAuthenticationInfo(authenticationToken.getPrincipal(), authenticationToken.getCredentials(), getName());
     }
 
-    /**
-     * 模拟用户权限
-     * 实际项目从数据库中查询
-     */
-    private Role getRoleByUsername(String username) {
-        if("user".equals(username)) {
-            return new Role("user");
-        }else if ("admin".equals(username)) {
-            return new Role(username);
-        }
-        return new Role("visitor");
-    }
 
      /*// 认证
     @Override

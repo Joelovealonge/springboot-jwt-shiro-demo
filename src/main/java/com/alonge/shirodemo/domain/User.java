@@ -1,16 +1,26 @@
 package com.alonge.shirodemo.domain;
 
 public class User {
+
+    private String userId;
     private String username;
     private String password;
-    private String salt;
 
-    public String getSalt() {
-        return salt;
+    public User() {
     }
 
-    public void setSalt(String salt) {
-        this.salt = salt;
+    public User(String userId, String username, String password) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {
